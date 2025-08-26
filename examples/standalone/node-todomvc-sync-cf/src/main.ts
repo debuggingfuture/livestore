@@ -20,28 +20,25 @@ const main = async () => {
 		syncPayload: { authToken: "insecure-token-change-me" },
 	});
 
+		// Work as expected
 	store.subscribe(queryDb(tables.todos), {
 		skipInitialRun: false,
 		onUpdate: (todos) => {
 			const todo = todos[todos.length - 1];
-			console.log("onUpdate", todos);
-			if (!todo) return;
-			store.commit(
-				events.commentCreated({
-					id: crypto.randomUUID(),
-					todoId: todo.id,
-					text: "Action created from onUpdate",
-				}),
-			);
+			console.log("onUpdate skipInitialRun=false", todos);
 		},
 	});
 
-	store.subscribe(queryDb(tables.comments), {
-		skipInitialRun: false,
-		onUpdate: (comments) => {
-			console.log("comments", comments.length);
+	// Never fired
+	store.subscribe(queryDb(tables.todos), {
+		skipInitialRun: true,
+		onUpdate: (todos) => {
+			const todo = todos[todos.length - 1];
+			console.log("onUpdate skipInitialRun=true", todos);
 		},
 	});
+
+
 
 	setInterval(() => {
 		store.commit(
@@ -52,7 +49,7 @@ const main = async () => {
 		);
 	}, 1000);
 
-	// TODO wait for syncing to be complete
+	// wait for syncing to be complete
 
 	await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
 
